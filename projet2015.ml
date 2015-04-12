@@ -215,7 +215,7 @@ let init = 0 and final = 1 in
 { name = ">$"
 ; initial = Q init
 ; transitions =
-    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2)
+    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2) (* On ne prend pas en compte le premier dollard *)
             ;(Q 2, Action(Match(BUT D), No_Write, Right), Q 2)
 					; (Q 2, Action(Match(SMB D), No_Write, Here ), Q final)
             ]
@@ -227,7 +227,7 @@ let init = 0 and final = 1 in
 { name = "_"
 ; initial = Q init
 ; transitions =
-    [ (Q init, Action(Match(BUT B), Write_smb B, Right), Q init)
+    [ (Q init, Action(Match(BUT B), Write_smb B, Right), Q init) 
 					;(Q init, Action(Match(SMB B), No_Write, Here ), Q final)
             ]
 }
@@ -238,7 +238,7 @@ let init = 0 and final = 1 in
 { name = "+1"
 ; initial = Q init
 ; transitions =
-    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2)
+    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2) (* On ne prend pas en compte le premier dollard *)
      ;(Q 2, Action(Match(IN [Z;B]), Write_smb U, Here), Q final)
 					;(Q 2, Action(Match(SMB U), Write_smb Z, Right ), Q 2)
             ]
@@ -276,6 +276,27 @@ let init = 0 and final = 1 and dollard = 2 and q1 = 3 and q0 = 4 and rp1 = 5 and
 
 
     end)
+
+(*Complexe 2*)
+let (cmp_2: turing_machine) = 
+let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
+{ name = "dec"
+; initial = Q init
+; transitions =
+  [ (Q init, Action(Match(SMB D), Write_smb S, Right), qDollard) (*Lecture d'un dollard*)
+  ;(Q init, Action(Match(SMB Z), Write_smb S, Right), q0) (*Lecture d'un 0 *)
+  ;(Q init, Action(Match(SMB U), Write_smb S, Right), q1) (*Lecture d'un 1 *)
+  ;(Q qDollard, Action(Match(SMB Z), Write_smb D, Right), q0) (* ecriture du $ et va dans l'etat 0 *)
+  ;(Q qDollard, Action(Match(SMB U), Write_smb D, Right), q1) (* ecriture du $ et va dans l'etat 1 *)
+  ;(Q q0, Action(Match(SMB Z), Write_smb 0, Right), q0)
+  ;(Q q0, Action(Match(SMB U), Write_smb 0, Right), q1)
+  ;(Q q1, Action(Match(SMB Z), Write_smb 1, Right), q0)
+  ;(Q q1, Action(Match(SMB U), Write_smb 1, Right), q1)
+  ;(Q q0, Action(Match(SMB B), Write_smb 0, Right), q final)
+  ;(Q q1, Action(Match(SMB B), Write_smb 1, Right), q final)
+  ]
+  }
+end)
     
 
     
