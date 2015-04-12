@@ -275,8 +275,6 @@ let init = 0 and final = 1 and dollard = 2 and q1 = 3 and q0 = 4 and rp1 = 5 and
 }
 
 
-    end)
-
 (*Complexe 2*)
 let (cmp_2: turing_machine) = 
 let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
@@ -297,7 +295,6 @@ let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
   ]
   }
 
-end)
 
 (*Complexe 3*)
 let (cmp_3: turing_machine) = 
