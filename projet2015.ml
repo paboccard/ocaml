@@ -324,9 +324,9 @@ let init = 0 and final = 8 in
   ;(Q 6, Action(Match(BUT B), No_Write, Right), Q 6) (* va tout a droite*)
   ;(Q 6, Action(Match(SMB B), Write_smb U, Left), Q 7) (* ecrit le 1*)
   ;(Q 7, Action(Match(BUT D), No_Write, Left), Q 7) (* revient au debut*)
-  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 8) (* on va droite du Dollard *)
-  ;(Q 8, Action(Match(BUT S), No_Write, Right), Q 9) (* on cherche le # pour le remplacer *)
-  ;(Q 9, Action(Match(SMB S), Write_smb U, Right), Q 2) (* on remplace # par 1 *)
+  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 10) (* on va droite du Dollard *)
+  ;(Q 10, Action(Match(BUT S), No_Write, Right), Q 11) (* on cherche le # pour le remplacer *)
+  ;(Q 11, Action(Match(SMB S), Write_smb U, Right), Q 2) (* on remplace # par 1 *)
 
   ;(Q 3, Action(Match(SMB S), No_Write, Here), Q final)
   ]
