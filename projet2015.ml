@@ -296,8 +296,43 @@ let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
   ;(Q q1, Action(Match(SMB B), Write_smb 1, Right), q final)
   ]
   }
-  
+
 end)
+
+(*Complexe 3*)
+let (cmp_3: turing_machine) = 
+let init = 0 and final = 8 in
+{ name = "copie"
+; initial = Q init
+; trnasitions: =
+  [ (Q init, Action(Match(BUT B), No_Write, Right), Q init) (*Va tout a droite*)
+  ;(Q init, Action(Match(SMB B), Write_smb S, Right), Q 1) (* ecriture du premier #*)
+  ;(Q 1, Action(Match(SMB B), Write_smb S, Left), Q 2) (* ecriture du deuxieme #*)
+  ;(Q 2, Action(Match(BUT D), No_Write, Left), Q 2) (* retourne au debut*)
+
+  ;(Q 2, Action(Match(SMB D), No_Write, Right), Q 3) 
+
+  ;(Q 3, Action(Match(SMB Z), Write_smb S, Right), Q 4) (* lecture d'un 0*)
+  ;(Q 4, Action(Match(BUT B), No_Write, Right), Q 4) (* va tout a droite*)
+  ;(Q 4, Action(Match(SMB B), Write_smb Z, Left), Q 5) (* ecrit le 0*)
+  ;(Q 5, Action(Match(BUT D), No_Write, Left), Q 5) (* revient au debut*)
+  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 8) (* on va droite du Dollard *)
+  ;(Q 8, Action(Match(BUT S), No_Write, Right), Q 9) (* on cherche le # pour le remplacer *)
+  ;(Q 9, Action(Match(SMB S), Write_smb Z, Right), Q 2) (* on remplace # par 0 *)
+
+  ;(Q 3, Action(Match(SMB U), Write_smb S, Right), Q 6) (* lecture d'un 1*)
+  ;(Q 6, Action(Match(BUT B), No_Write, Right), Q 6) (* va tout a droite*)
+  ;(Q 6, Action(Match(SMB B), Write_smb U, Left), Q 7) (* ecrit le 1*)
+  ;(Q 7, Action(Match(BUT D), No_Write, Left), Q 7) (* revient au debut*)
+  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 8) (* on va droite du Dollard *)
+  ;(Q 8, Action(Match(BUT S), No_Write, Right), Q 9) (* on cherche le # pour le remplacer *)
+  ;(Q 9, Action(Match(SMB S), Write_smb U, Right), Q 2) (* on remplace # par 1 *)
+
+  ;(Q 3, Action(Match(SMB S), No_Write, Here), Q final)
+  ]
+  }
+end)
+
     
 
     
