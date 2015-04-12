@@ -296,6 +296,7 @@ let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
   ;(Q q1, Action(Match(SMB B), Write_smb 1, Right), q final)
   ]
   }
+  
 end)
     
 
