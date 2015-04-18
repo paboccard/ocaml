@@ -61,12 +61,12 @@ module Symbol =
       let (_ALPHABET_ : symbol list) = [ D ; B ; S ; Z ; U] 
 
       let (pretty: symbol -> string) = fun symbol ->
-match symbol with
-| D -> "$"
-| B -> "_"
-| S -> "#"
-| Z -> "0"
-| U -> "1"
+	match symbol with
+	| D -> "$"
+	| B -> "_"
+	| S -> "#"
+	| Z -> "0"
+	| U -> "1"
     end)
     
     
@@ -78,32 +78,32 @@ type 'a pattern =
   | BUT of 'a 
   | IN  of 'a list
   | OUT of 'a list
-      
+	      
 module Pattern = 
   (struct 
       type 'a t = 'a pattern
 
       let (exactly: 'a pattern -> 'a -> bool) = fun pattern a -> 
-pattern = SMB a
+	pattern = SMB a
 
       let (matches: 'a pattern -> 'a -> bool) = fun pattern a' ->
-match pattern with 
-| ANY -> true
-| SMB a -> a = a'
-| BUT a -> a <> a'
-| IN  aS -> List.mem a' aS
-| OUT aS -> not (List.mem a' aS)
+	match pattern with 
+	| ANY -> true
+	| SMB a -> a = a'
+	| BUT a -> a <> a'
+	| IN  aS -> List.mem a' aS
+	| OUT aS -> not (List.mem a' aS)
 
       let (pretty: ('a -> string) -> 'a pattern -> string) = fun pp pattern ->
-match pattern with
-| ANY -> "_"
-| SMB a -> pp a
-| BUT a -> "~" ^ (pp a)
-| IN  aS -> "{" ^ (String.concat "," (List.map pp aS)) ^ "}"
-| OUT aS -> "~{" ^ (String.concat "," (List.map pp aS)) ^ "}"
+	match pattern with
+	| ANY -> "_"
+	| SMB a -> pp a
+	| BUT a -> "~" ^ (pp a)
+	| IN  aS -> "{" ^ (String.concat "," (List.map pp aS)) ^ "}"
+	| OUT aS -> "~{" ^ (String.concat "," (List.map pp aS)) ^ "}"
 
       let (print: ('a -> string) -> 'a pattern -> unit) = fun pp pattern -> 
-print_string (pretty pp pattern)
+	print_string (pretty pp pattern)
 
     end)
 
@@ -125,7 +125,7 @@ type writing =
   | No_Write
   | Write_smb of symbol
 
-   
+		   
 (* TURING MACHINE STATE *)
 
 type state =
@@ -137,11 +137,11 @@ module State =
   (struct
 
       let (pretty: state -> string) = fun state ->
-match state with
-| Qacc -> "A"
-| Qrej -> "R"
-| Q(i) -> "Q" ^ (string_of_int i)
-  
+	match state with
+	| Qacc -> "A"
+	| Qrej -> "R"
+	| Q(i) -> "Q" ^ (string_of_int i)
+			  
     end)
     
     
@@ -154,7 +154,7 @@ type action = reading * writing * moving
 type instruction =
   | Action  of action
 
- 
+		 
 (* TRANSITION *)    
 
 type transition = state * instruction * state
@@ -163,13 +163,13 @@ module Transition =
   (struct
 
       let (nop: state -> state -> transition) = fun source target ->  (source, Action(Match ANY, No_Write, Here), target)
-      
+									
     end)
     
 (* TURING MACHINE *)
 
 type name = string
-      
+	      
 type turing_machine = { name: name ; initial: state ; transitions: transition list }
 
 
@@ -182,153 +182,209 @@ module TM =
       let (nop: turing_machine) = { name = "nop" ; initial = Q 0 ; transitions = [] }
 
       let (to_end: turing_machine) =
-      let init = 0 and final = 1 in
-      { name = ">B"
-      ; initial = Q init
-      ; transitions =
-          [ (Q init, Action(Match(BUT B), No_Write, Right), Q init)
+	let init = 0 and final = 1 in
+	{ name = ">B"
+	; initial = Q init
+	; transitions =
+            [ (Q init, Action(Match(BUT B), No_Write, Right), Q init)
             ; (Q init, Action(Match(SMB B), No_Write, Here ), Q final)
-	      ]
-	      }
-(* MT basiques :  *)
-(*         1. avancer jusqu'au blanc à droite,  *)
-(*         2. avancer jusqu'au dollar à droite,  *)
-(*         3. effacer le ruban,  *)
-(*            ex: $.1.0.1 -- erase --> $._._._ *)
+	    ]
+	}
+      (* MT basiques :  *)
+      (*         1. avancer jusqu'au blanc à droite,  *)
+      (*         2. avancer jusqu'au dollar à droite,  *)
+      (*         3. effacer le ruban,  *)
+      (*            ex: $.1.0.1 -- erase --> $._._._ *)
 
-(*         4. incrémenter un entier binaire en Little-Endian*)
+      (*         4. incrémenter un entier binaire en Little-Endian*)
 
-(*Basique 1*)
+      (*Basique 1*)
       let (bas_1: turing_machine) =
-let init = 0 and final = 1 in
-{ name = ">B"
-; initial = Q init
-; transitions =
-    [ (Q init, Action(Match(BUT B), No_Write, Right), Q init)
+	let init = 0 and final = 1 in
+	{ name = ">B"
+	; initial = Q init
+	; transitions =
+	    [ (Q init, Action(Match(BUT B), No_Write, Right), Q init)
             ; (Q init, Action(Match(SMB B), No_Write, Here ), Q final)
-    ]
-}
+	    ]
+	}
 
-(*Basique 2 ne prend pas en compte le $ initial*)
+      (*Basique 2 ne prend pas en compte le $ initial*)
       let (bas_2: turing_machine) =
-let init = 0 and final = 1 in
-{ name = ">$"
-; initial = Q init
-; transitions =
-    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2) (* On ne prend pas en compte le premier dollard *)
-            ;(Q 2, Action(Match(BUT D), No_Write, Right), Q 2)
-					; (Q 2, Action(Match(SMB D), No_Write, Here ), Q final)
+	let init = 0 and final = 1 in
+	{ name = ">$"
+	; initial = Q init
+	; transitions =
+	    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2) (* On ne prend pas en compte le premier dollard *)
+             ;(Q 2, Action(Match(BUT D), No_Write, Right), Q 2)
+	     ; (Q 2, Action(Match(SMB D), No_Write, Here ), Q final)
             ]
-}
+	}
 
       (*Basique 3*)
       let (bas_3: turing_machine) =
-let init = 0 and final = 1 in
-{ name = "_"
-; initial = Q init
-; transitions =
-    [ (Q init, Action(Match(BUT B), Write_smb B, Right), Q init) 
-					;(Q init, Action(Match(SMB B), No_Write, Here ), Q final)
+	let init = 0 and final = 1 in
+	{ name = "_"
+	; initial = Q init
+	; transitions =
+	    [ (Q init, Action(Match(BUT B), Write_smb B, Right), Q init) 
+	     ;(Q init, Action(Match(SMB B), No_Write, Here ), Q final)
             ]
-}
+	}
 
       (*Basique 4 en Little-Endian*)
       let (bas_4: turing_machine) =
-let init = 0 and final = 1 in
-{ name = "+1"
-; initial = Q init
-; transitions =
-    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2) (* On ne prend pas en compte le premier dollard *)
-     ;(Q 2, Action(Match(IN [Z;B]), Write_smb U, Here), Q final)
-					;(Q 2, Action(Match(SMB U), Write_smb Z, Right ), Q 2)
+	let init = 0 and final = 1 in
+	{ name = "+1"
+	; initial = Q init
+	; transitions =
+	    [ (Q init, Action(Match(SMB D), No_Write, Right), Q 2) (* On ne prend pas en compte le premier dollard *)
+	     ;(Q 2, Action(Match(IN [Z;B]), Write_smb U, Here), Q final)
+	     ;(Q 2, Action(Match(SMB U), Write_smb Z, Right ), Q 2)
             ]
-}
+	}
 
- (* + 2 : MT complexes:  *)
- (*        1. échanger deux cases consécutives à partir de la position courante *)
-            
- (*        2. décaler le mot d'un case à partir de la position courante pour y insérer un séparateur S *)
- (*             ex: $.1.(0).1 --- dec --> $.1.#.0.1 *)
- (*                      | *)
- (*        3. dupliquer le mot d'entrée en séparant les deux copies par 2 symboles S *)
- (*             ex: ($).1.0.1 --- dup --> $.1.0.1.#.#.1.0.1 *)
+      (* + 2 : MT complexes:  *)
+      (*        1. échanger deux cases consécutives à partir de la position courante *)
+          
+      (*        2. décaler le mot d'un case à partir de la position courante pour y insérer un séparateur S *)
+      (*             ex: $.1.(0).1 --- dec --> $.1.#.0.1 *)
+      (*                      | *)
+      (*        3. dupliquer le mot d'entrée en séparant les deux copies par 2 symboles S *)
+      (*             ex: ($).1.0.1 --- dup --> $.1.0.1.#.#.1.0.1 *)
 
 
-  (*Complexe 1*)
+      (*Complexe 1*)
       let (cmp_1: turing_machine) =
-let init = 0 and final = 1 and dollard = 2 and q1 = 3 and q0 = 4 and rp1 = 5 and rp0 = 6 in
-{ name = "swap"
-; initial = Q init
-; transitions =
-     [ (Q init, Action(Match(SMB D), No_Write, Right), Q dollard)
-     ;(Q init, Action(Match(SMB U), No_Write, Right), Q rp1)
-     ;(Q init, Action(Match(SMB Z), No_Write, Right), Q rp0)
-     ;(Q dollard, Action(Match(SMB U), Write_smb D, Left), Q q1)
-     ;(Q dollard, Action(Match(SMB Z), Write_smb D, Left), Q q0)
-     ;(Q rp1, Action(Match(SMB U), Write_smb U, Left), Q q1)
-     ;(Q rp1, Action(Match(SMB Z), Write_smb U, Left), Q q0)
-     ;(Q rp0, Action(Match(SMB U), Write_smb Z, Left), Q q1)
-     ;(Q rp0, Action(Match(SMB Z), Write_smb Z, Left), Q q0)
-     ;(Q q1, Action(Match(BUT B), Write_smb U, Right), Q final)
-     ;(Q q0, Action(Match(BUT B), Write_smb Z, Right), Q final)
+	let init = 0 and final = 1 and dollard = 2 and q1 = 3 and q0 = 4 and rp1 = 5 and rp0 = 6 in
+	{ name = "swap"
+	; initial = Q init
+	; transitions =
+	    [ (Q init, Action(Match(SMB D), No_Write, Right), Q dollard)
+	     ;(Q init, Action(Match(SMB U), No_Write, Right), Q rp1)
+	     ;(Q init, Action(Match(SMB Z), No_Write, Right), Q rp0)
+	     ;(Q dollard, Action(Match(SMB U), Write_smb D, Left), Q q1)
+	     ;(Q dollard, Action(Match(SMB Z), Write_smb D, Left), Q q0)
+	     ;(Q rp1, Action(Match(SMB U), Write_smb U, Left), Q q1)
+	     ;(Q rp1, Action(Match(SMB Z), Write_smb U, Left), Q q0)
+	     ;(Q rp0, Action(Match(SMB U), Write_smb Z, Left), Q q1)
+	     ;(Q rp0, Action(Match(SMB Z), Write_smb Z, Left), Q q0)
+	     ;(Q q1, Action(Match(BUT B), Write_smb U, Right), Q final)
+	     ;(Q q0, Action(Match(BUT B), Write_smb Z, Right), Q final)
             ]
-}
+	}
 
 
-(*Complexe 2*)
-let (cmp_2: turing_machine) = 
-let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
-{ name = "dec"
-; initial = Q init
-; transitions =
-  [ (Q init, Action(Match(SMB D), Write_smb S, Right), qDollard) (*Lecture d'un dollard*)
-  ;(Q init, Action(Match(SMB Z), Write_smb S, Right), q0) (*Lecture d'un 0 *)
-  ;(Q init, Action(Match(SMB U), Write_smb S, Right), q1) (*Lecture d'un 1 *)
-  ;(Q qDollard, Action(Match(SMB Z), Write_smb D, Right), q0) (* ecriture du $ et va dans l'etat 0 *)
-  ;(Q qDollard, Action(Match(SMB U), Write_smb D, Right), q1) (* ecriture du $ et va dans l'etat 1 *)
-  ;(Q q0, Action(Match(SMB Z), Write_smb 0, Right), q0)
-  ;(Q q0, Action(Match(SMB U), Write_smb 0, Right), q1)
-  ;(Q q1, Action(Match(SMB Z), Write_smb 1, Right), q0)
-  ;(Q q1, Action(Match(SMB U), Write_smb 1, Right), q1)
-  ;(Q q0, Action(Match(SMB B), Write_smb 0, Right), q final)
-  ;(Q q1, Action(Match(SMB B), Write_smb 1, Right), q final)
-  ]
-  }
+      (*Complexe 2*)
+      let (cmp_2: turing_machine) = 
+	let init = 0 and final = 1 and qDollard = 2 and q1 = 3 and q0 = 4 in
+	{ name = "dec"
+	; initial = Q init
+	; transitions =
+	    [ (Q init, Action(Match(SMB D), Write_smb S, Right),Q qDollard) (*Lecture d'un dollard*)
+	     ;(Q init, Action(Match(SMB Z), Write_smb S, Right),Q q0) (*Lecture d'un 0 *)
+	     ;(Q init, Action(Match(SMB U), Write_smb S, Right),Q q1) (*Lecture d'un 1 *)
+	     ;(Q qDollard, Action(Match(SMB Z), Write_smb D, Right),Q q0) (* ecriture du $ et va dans l'etat 0 *)
+	     ;(Q qDollard, Action(Match(SMB U), Write_smb D, Right),Q q1) (* ecriture du $ et va dans l'etat 1 *)
+	     ;(Q q0, Action(Match(SMB Z), Write_smb Z, Right),Q q0)
+	     ;(Q q0, Action(Match(SMB U), Write_smb Z, Right),Q q1)
+	     ;(Q q1, Action(Match(SMB Z), Write_smb U, Right),Q q0)
+	     ;(Q q1, Action(Match(SMB U), Write_smb U, Right),Q q1)
+	     ;(Q q0, Action(Match(SMB B), Write_smb Z, Right),Q final)
+	     ;(Q q1, Action(Match(SMB B), Write_smb U, Right),Q final)
+	    ]
+	}
 
 
-(*Complexe 3*)
-let (cmp_3: turing_machine) = 
-let init = 0 and final = 8 in
-{ name = "copie"
-; initial = Q init
-; trnasitions: =
-  [ (Q init, Action(Match(BUT B), No_Write, Right), Q init) (*Va tout a droite*)
-  ;(Q init, Action(Match(SMB B), Write_smb S, Right), Q 1) (* ecriture du premier #*)
-  ;(Q 1, Action(Match(SMB B), Write_smb S, Left), Q 2) (* ecriture du deuxieme #*)
-  ;(Q 2, Action(Match(BUT D), No_Write, Left), Q 2) (* retourne au debut*)
+      (*Complexe 3*)
+      let (cmp_3: turing_machine) = 
+	let init = 0 and final = 11 in
+	{ name = "copie"
+	; initial = Q init
+	; transitions =
 
-  ;(Q 2, Action(Match(SMB D), No_Write, Right), Q 3) 
+	    [ (Q init, Action(Match(BUT B), No_Write, Right), Q init) (*Va tout a droite*)
+	     ;(Q init, Action(Match(SMB B), Write_smb S, Right), Q 1) (* ecriture du premier #*)
+	     ;(Q 1, Action(Match(SMB B), Write_smb S, Left), Q 2) (* ecriture du deuxieme #*)
+	     ;(Q 2, Action(Match(BUT D), No_Write, Left), Q 2) (* retourne au debut*)
 
-  ;(Q 3, Action(Match(SMB Z), Write_smb S, Right), Q 4) (* lecture d'un 0*)
-  ;(Q 4, Action(Match(BUT B), No_Write, Right), Q 4) (* va tout a droite*)
-  ;(Q 4, Action(Match(SMB B), Write_smb Z, Left), Q 5) (* ecrit le 0*)
-  ;(Q 5, Action(Match(BUT D), No_Write, Left), Q 5) (* revient au debut*)
-  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 8) (* on va droite du Dollard *)
-  ;(Q 8, Action(Match(BUT S), No_Write, Right), Q 9) (* on cherche le # pour le remplacer *)
-  ;(Q 9, Action(Match(SMB S), Write_smb Z, Right), Q 2) (* on remplace # par 0 *)
+	     ;(Q 2, Action(Match(SMB D), No_Write, Right), Q 3)
 
-  ;(Q 3, Action(Match(SMB U), Write_smb S, Right), Q 6) (* lecture d'un 1*)
-  ;(Q 6, Action(Match(BUT B), No_Write, Right), Q 6) (* va tout a droite*)
-  ;(Q 6, Action(Match(SMB B), Write_smb U, Left), Q 7) (* ecrit le 1*)
-  ;(Q 7, Action(Match(BUT D), No_Write, Left), Q 7) (* revient au debut*)
-  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 10) (* on va droite du Dollard *)
-  ;(Q 10, Action(Match(BUT S), No_Write, Right), Q 11) (* on cherche le # pour le remplacer *)
-  ;(Q 11, Action(Match(SMB S), Write_smb U, Right), Q 2) (* on remplace # par 1 *)
+	     ;(Q 3, Action(Match(SMB Z), Write_smb S, Right), Q 4) (* lecture d'un 0*)
+	     ;(Q 4, Action(Match(BUT B), No_Write, Right), Q 4) (* va tout a droite*)
+	     ;(Q 4, Action(Match(SMB B), Write_smb Z, Left), Q 5) (* ecrit le 0*)
+	     ;(Q 5, Action(Match(BUT D), No_Write, Left), Q 5) (* revient au debut*)
+	     ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 6) (* on va droite du Dollard *)
+	     ;(Q 6, Action(Match(BUT S), No_Write, Right), Q 6) (* on cherche le # pour le remplacer *)
+	     ;(Q 6, Action(Match(SMB S), Write_smb Z, Right), Q 3) (* on remplace # par 0 *)
 
-  ;(Q 3, Action(Match(SMB S), No_Write, Here), Q final)
-  ]
-  }
-end)
+	     ;(Q 3, Action(Match(SMB U), Write_smb S, Right), Q 7) (* lecture d'un 1*)
+	     ;(Q 7, Action(Match(BUT B), No_Write, Right), Q 7) (* va tout a droite*)
+	     ;(Q 7, Action(Match(SMB B), Write_smb U, Left), Q 8) (* ecrit le 1*)
+	     ;(Q 8, Action(Match(BUT D), No_Write, Left), Q 8) (* revient au debut*)
+	     ;(Q 8, Action(Match(SMB D), No_Write, Right), Q 9) (* on va droite du Dollard *)
+	     ;(Q 9, Action(Match(BUT S), No_Write, Right), Q 9) (* on cherche le # pour le remplacer *)
+	     ;(Q 9, Action(Match(SMB S), Write_smb U, Right), Q 3) (* on remplace # par 1 *)
+
+	     ;(Q 3, Action(Match(SMB S), No_Write, Here), Q final)
+	    ]
+	    (* [ (Q init, Action(Match(BUT B), No_Write, Right), Q init) (\*Va tout a droite*\) *)
+	    (*  ;(Q init, Action(Match(SMB B), Write_smb S, Right), Q 1) (\* ecriture du premier #*\) *)
+	    (*  ;(Q 1, Action(Match(SMB B), Write_smb S, Left), Q 2) (\* ecriture du deuxieme #*\) *)
+	    (*  ;(Q 2, Action(Match(BUT D), No_Write, Left), Q 2) (\* retourne au debut*\) *)
+
+	    (*  ;(Q 2, Action(Match(SMB D), No_Write, Right), Q 3) *)
+
+	    (*  ;(Q 3, Action(Match(SMB Z), Write_smb S, Right), Q 4) (\* lecture d'un 0*\) *)
+	    (*  ;(Q 4, Action(Match(BUT B), No_Write, Right), Q 4) (\* va tout a droite*\) *)
+	    (*  ;(Q 4, Action(Match(SMB B), Write_smb Z, Left), Q 5) (\* ecrit le 0*\) *)
+	    (*  ;(Q 5, Action(Match(BUT D), No_Write, Left), Q 5) (\* revient au debut*\) *)
+	    (*  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 6) (\* on va droite du Dollard *\) *)
+	    (*  ;(Q 6, Action(Match(BUT S), No_Write, Right), Q 7) (\* on cherche le # pour le remplacer *\) *)
+	    (*  ;(Q 7, Action(Match(SMB S), Write_smb Z, Right), Q 3) (\* on remplace # par 0 *\) *)
+
+	    (*  ;(Q 3, Action(Match(SMB U), Write_smb S, Right), Q 8) (\* lecture d'un 1*\) *)
+	    (*  ;(Q 8, Action(Match(BUT B), No_Write, Right), Q 8) (\* va tout a droite*\) *)
+	    (*  ;(Q 8, Action(Match(SMB B), Write_smb U, Left), Q 9) (\* ecrit le 1*\) *)
+	    (*  ;(Q 9, Action(Match(BUT D), No_Write, Left), Q 9) (\* revient au debut*\) *)
+	    (*  ;(Q 9, Action(Match(SMB D), No_Write, Right), Q 10) (\* on va droite du Dollard *\) *)
+	    (*  ;(Q 10, Action(Match(BUT S), No_Write, Right), Q 10) (\* on cherche le # pour le remplacer *\) *)
+	    (*  ;(Q 10, Action(Match(SMB S), Write_smb U, Right), Q 3) (\* on remplace # par 1 *\) *)
+
+	    (*  ;(Q 3, Action(Match(SMB S), No_Write, Here), Q final) *)
+	    (* ] *)
+
+
+
+
+
+	(* [ (Q init, Action(Match(BUT B), No_Write, Right), Q init) (\*Va tout a droite*\) *)
+	(*  ;(Q init, Action(Match(SMB B), Write_smb S, Right), Q 1) (\* ecriture du premier #*\) *)
+	(*  ;(Q 1, Action(Match(SMB B), Write_smb S, Left), Q 2) (\* ecriture du deuxieme #*\) *)
+	(*  ;(Q 2, Action(Match(BUT D), No_Write, Left), Q 2) (\* retourne au debut*\) *)
+	      
+	(*  ;(Q 2, Action(Match(SMB D), No_Write, Right), Q 3)  *)
+
+	(*  ;(Q 3, Action(Match(SMB Z), Write_smb S, Right), Q 4) (\* lecture d'un 0*\) *)
+	(*  ;(Q 4, Action(Match(BUT B), No_Write, Right), Q 4) (\* va tout a droite*\) *)
+	(*  ;(Q 4, Action(Match(SMB B), Write_smb Z, Left), Q 5) (\* ecrit le 0*\) *)
+	(*  ;(Q 5, Action(Match(BUT D), No_Write, Left), Q 5) (\* revient au debut*\) *)
+	(*  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 8) (\* on va droite du Dollard *\) *)
+	(*  ;(Q 8, Action(Match(BUT S), No_Write, Right), Q 9) (\* on cherche le # pour le remplacer *\) *)
+	(*  ;(Q 9, Action(Match(SMB S), Write_smb Z, Right), Q 2) (\* on remplace # par 0 *\) *)
+
+	(*  ;(Q 3, Action(Match(SMB U), Write_smb S, Right), Q 6) (\* lecture d'un 1*\) *)
+	(*  ;(Q 6, Action(Match(BUT B), No_Write, Right), Q 6) (\* va tout a droite*\) *)
+	(*  ;(Q 6, Action(Match(SMB B), Write_smb U, Left), Q 7) (\* ecrit le 1*\) *)
+	(*  ;(Q 7, Action(Match(BUT D), No_Write, Left), Q 7) (\* revient au debut*\) *)
+	(*  ;(Q 5, Action(Match(SMB D), No_Write, Right), Q 10) (\* on va droite du Dollard *\) *)
+	(*  ;(Q 10, Action(Match(BUT S), No_Write, Right), Q 11) (\* on cherche le # pour le remplacer *\) *)
+	(*  ;(Q 11, Action(Match(SMB S), Write_smb U, Right), Q 2) (\* on remplace # par 1 *\) *)
+
+	(*  ;(Q 3, Action(Match(SMB S), No_Write, Here), Q final) *)
+	(* ] *)
+	}
+    end)
 
     
 
@@ -338,56 +394,56 @@ end)
 type band = { left: symbol list ; head: symbol ; right: symbol list }
 
 type data = symbol list
-   
+		   
 module Band =
   (struct
 
       let (empty: band) = { left = [] ; head = D ; right = [] }
-          
+			    
       let (init_with: data -> band) = fun data -> { empty with right = data }
 
       (* /!\ The left part of the band is written in the reverse ordrer. It is easier to implement this way.
        A band containing  a b c d (e) f g h with the head on (e) will be encoded by
          { left = [d;c;b;a] ; head =e ; right = [f;g;h] }
        *)
-          
+						    
       let (move_head_right: band -> band) = fun band ->
-      match band.right with
-      | []    -> { left = band.head::band.left ; head = B ; right = [] }
-| s::ms -> { left = band.head::band.left ; head = s ; right = ms }
-     
+	match band.right with
+	| []    -> { left = band.head::band.left ; head = B ; right = [] }
+	| s::ms -> { left = band.head::band.left ; head = s ; right = ms }
+		     
       let (move_head_left: band -> band) = fun band ->
-      match band.left with 
-      | []    -> { right = band.head::band.right ; head = D ; left = [] }
-| s::ms -> { right = band.head::band.right ; head = s ; left = ms }
+	match band.left with 
+	| []    -> { right = band.head::band.right ; head = D ; left = [] }
+	| s::ms -> { right = band.head::band.right ; head = s ; left = ms }
 
-  
+		     
       let (do_move: moving -> band -> band) = fun moving band ->
-      match moving with
-      | Left  -> move_head_left band
-| Right -> move_head_right band 
-| Here  -> band
-     
+	match moving with
+	| Left  -> move_head_left band
+	| Right -> move_head_right band 
+	| Here  -> band
+		     
       let (do_write: writing -> band -> band) = fun writing band ->
-match writing with
-  | No_Write -> band
-    | Write_smb(smb)-> { right = band.right ; head = smb ; left = band.left }
+	match writing with
+	| No_Write -> band
+	| Write_smb(smb)-> { right = band.right ; head = smb ; left = band.left }
 
-  
+			     
       let (update_wrt: (writing * moving) -> band -> band) = fun (writing,moving) band ->
-do_move moving (do_write writing band)
+	do_move moving (do_write writing band)
 
       let (parenthesis: string -> string) = fun string -> "(" ^ string ^ ")"
-   
+									   
       let (pretty: band -> string) = fun band ->
-let strings = 
-  (List.map Symbol.pretty (List.rev band.left))
+	let strings = 
+	  (List.map Symbol.pretty (List.rev band.left))
           @
-    [ parenthesis (Symbol.pretty band.head) ]
-  @
-    (List.map Symbol.pretty (band.right))
-in
-String.concat "." strings
+	    [ parenthesis (Symbol.pretty band.head) ]
+	  @
+	    (List.map Symbol.pretty (band.right))
+	in
+	String.concat "." strings
 
     end)
 
@@ -403,44 +459,44 @@ module Configuration =
   (struct
 
       let (empty: configuration) = { band = Band.empty ; state = Q 0 ; status = Final }
-     
+				     
       let (init_with: turing_machine -> data -> configuration) = fun mt data ->
-{ band = Band.init_with data ; state = mt.initial ; status = Running }
+	{ band = Band.init_with data ; state = mt.initial ; status = Running }
 
       let  (take: transition -> configuration -> configuration) = fun (source,action,target) cfg ->
-match action with
-| Action( Match(pattern), writing, moving) ->
-   if (Pattern.matches pattern cfg.band.head)
-   then { cfg with state = target ; band = Band.update_wrt (writing,moving) cfg.band }
-   else { cfg with status = Final }
+	match action with
+	| Action( Match(pattern), writing, moving) ->
+	   if (Pattern.matches pattern cfg.band.head)
+	   then { cfg with state = target ; band = Band.update_wrt (writing,moving) cfg.band }
+	   else { cfg with status = Final }
 
-   
-   let (one_step: turing_machine -> configuration -> configuration) = fun mt cfg ->
-     let (is_outgoing: transition -> bool) = fun (src,_,_) -> 
-       match src,cfg.state with
-  | Q(i),Q(j) -> i != j
-  | _,_ -> true
-     and (is_enabled: transition -> bool) = fun (state,action,_) ->  
-       (match action with
-	      | Action( Match(pattern), _, _) -> state=cfg.state && Pattern.matches pattern cfg.band.head
-       )
-     in 
-             let enabled_transitions = List.filter is_enabled mt.transitions
-     in
-     match enabled_transitions with
-     | [] -> { cfg with status = Final }
-          | [transition] -> let conftmp= take transition cfg in
-       {conftmp with
- status = (if is_outgoing transition
-   then Final else Running)}
-     | _ -> failwith "non deterministic MT in one_step"
-          
-          
+		  
+      let (one_step: turing_machine -> configuration -> configuration) = fun mt cfg ->
+	let (is_outgoing: transition -> bool) = fun (src,_,_) -> 
+	  match src,cfg.state with
+	  | Q(i),Q(j) -> i != j
+	  | _,_ -> true
+	and (is_enabled: transition -> bool) = fun (state,action,_) ->  
+	  (match action with
+	   | Action( Match(pattern), _, _) -> state=cfg.state && Pattern.matches pattern cfg.band.head
+	  )
+	in 
+        let enabled_transitions = List.filter is_enabled mt.transitions
+	in
+	match enabled_transitions with
+	| [] -> { cfg with status = Final }
+        | [transition] -> let conftmp= take transition cfg in
+			  {conftmp with
+			    status = (if is_outgoing transition
+				      then Final else Running)}
+	| _ -> failwith "non deterministic MT in one_step"
+			
+			
       let (pretty: configuration -> string) = fun cfg ->
-      String.concat ": " [ State.pretty cfg.state ; Band.pretty cfg.band ]
-            
+	String.concat ": " [ State.pretty cfg.state ; Band.pretty cfg.band ]
+		      
       let (print: configuration -> unit) = fun cfg ->
-      print_string ("\n" ^ (pretty cfg) ^ "\n") 
+	print_string ("\n" ^ (pretty cfg) ^ "\n") 
 
     end)
     
@@ -482,9 +538,9 @@ let rec (move: configuration -> int->configuration)= fun cfg dpl ->
   match dpl with
   |0 -> cfg
   |_ ->    match cfg.band.right with
-   |[]->cfg
-   |a::suite -> let cfgtmp:configuration =((suite,a,cfg.band.head::cfg.band.left),cfg.state,cfg.status) in 
-       move cfgtmp (dpl-1)
+	   |[]->cfg
+	   |a::suite -> let cfgtmp:configuration ={band={left=cfg.band.head::cfg.band.left;head=a;right=suite};state=cfg.state;status=cfg.status} in 
+			move cfgtmp (dpl-1)
 ;;
 
 let (deplacement : int-> configuration)= fun dpl ->
@@ -492,16 +548,16 @@ let (deplacement : int-> configuration)= fun dpl ->
     _CFG := move !(_CFG) dpl;
     !(_CFG);
   end
-;;
+;; 
   (* TEST *)    
 
-(* affichage de la MT *)  
+  (* affichage de la MT *)  
 
   TM.to_end ;;
 
   (* initialisation de la configuration de départ *)
   
-  initialize TM.dup [U;Z;U] ;;
+  initialize TM.cmp_3 [U;Z;U] ;;
 
     (* Pour une execution pas à pas, utilisez 
          one_step () ;;
@@ -516,7 +572,7 @@ let (deplacement : int-> configuration)= fun dpl ->
 			   one_step () ;;
 			     one_step () ;;
 			       one_step () ;;
-			       *)  
+     *)  
 
 
     (* Pour execution jusqu'à l'arrêt (si la MT termine...), utilisez 
@@ -596,7 +652,7 @@ Q6: $.1.0.1.#.(#).1.0.1
 Q42: $.1.0.1.#.(#).1.0.1
 Q42: $.1.0.1.#.(#).1.0.1
 
-*)  
+       *)  
 
 
 
